@@ -64,7 +64,7 @@ function Remove-And-Shred-Files([string[]] $LinuxPaths) {
     foreach ($path in $LinuxPaths) {
         # If files haven't been removed properly, directories are left intact
         Write-Output "Shredding $path"
-        wsl -- eval "find $path -type f -exec shred -$options {} + && find $path -type d -delete"
+        wsl -- eval "find $path -type f -exec shred -$options {} + && find $path -type d -delete 2>/dev/null"
     }
 }
 
