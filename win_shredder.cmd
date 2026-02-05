@@ -1,5 +1,5 @@
 @echo off
 
-powershell -File "%~dp0win_shredder.ps1" %*
+powershell -version 5 -File "%~dp0win_shredder.ps1" %*
 
 pause

@@ -1,4 +1,6 @@
+# Debug options
 # $DebugPreference = 'Continue'
+# $VerbosePreference = 'Continue'
 
 # Resolves the issue of Write-Debug wrapping text
 # https://stackoverflow.com/a/4103885
@@ -53,14 +55,20 @@ function ConvertTo-Linux-Paths([string[]] $Paths) {
 
 # Securely removes files and folders
 function Remove-And-Shred-Files([string[]] $LinuxPaths) {
-    foreach ($path in $LinuxPaths) {
-        wsl -- eval "find $path -type f -exec shred -uvz {} +"
+    $options = 'uz'
+
+    if ($VerbosePreference -ne 'SilentlyContinue') {
+        $options += 'v'
     }
 
-    # TODO Files have been shredded, now remove (nested) folders
+    foreach ($path in $LinuxPaths) {
+        # If files haven't been removed properly, directories are left intact
+        Write-Output "Shredding $path"
+        wsl -- eval "find $path -type f -exec shred -$options {} + && find $path -type d -delete"
+    }
 }
 
-# The script entrypoint
+# The shredder entrypoint
 function Main([string[]] $WindowsPaths) {
     # Error handling
     if ($WindowsPaths.Length -lt 1) {
@@ -69,18 +77,19 @@ function Main([string[]] $WindowsPaths) {
     }
 
     # Fully qualifying paths
-    $absPaths = Convert-Path -LiteralPath $WindowsPaths
+    $paths = Convert-Path -LiteralPath $WindowsPaths
 
-    if ($null -eq $absPaths) {
+    if ($null -eq $paths) {
         Write-Error "Failed to parse paths. See above error."
         return
     }
-    elseif ($absPaths -is [string]) {
-        $absPaths = @($absPaths)
+    elseif ($paths -is [string]) {
+        $paths = @($paths)
     }
 
     # Shredding files
-    Remove-And-Shred-Files (ConvertTo-Linux-Paths $absPaths)
+    Remove-And-Shred-Files (ConvertTo-Linux-Paths $paths)
+    Write-Output "Complete!"
 }
 
 # Running entrypoint
