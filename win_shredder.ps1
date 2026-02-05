@@ -29,7 +29,7 @@ function Format-PowerShell() {
     )
 
     # Order is important!
-    return $Str.Replace('`', '``').Replace('$', '`$')
+    return $Str.Replace('\', '\\').Replace('`', '\`')
 }
 
 # Converts Windows paths to WSL paths
@@ -50,24 +50,30 @@ function ConvertTo-Linux-Paths() {
     $pathCmd = "$setPathsCmd; for ((i = 0; i < `${#paths[@]}; i++)); do wslpath -u `"`${paths[`$i]}`" 2>/dev/null; done"
     $pathCmd = Format-Dollars-Linux $pathCmd
 
-    # TODO TESTING
-    Write-Output $pathCmd
-
     # Performing conversion
-    return (wsl -- eval $pathCmd).Split("`n")
+    $paths = (wsl -- eval $pathCmd).Split("`n")
+
+    # Quoting paths, in case they have spaces
+    for ($i = 0; $i -lt $paths.Length; $i++) {
+        $paths[$i] = "'" + (Format-Quotes-Linux $paths[$i]) + "'"
+    }
+
+    return $paths
 }
 
 # Securely removes files and folders
-function Close-And-Shred-Items() {
+function Remove-And-Shred-Files() {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
         [string[]]$LinuxPaths
     )
 
-    foreach ($path in $paths) {
-        wsl -- find $path -type f -exec shred -uvz {} +
+    foreach ($path in $LinuxPaths) {
+        wsl -- eval "find $path -type f -exec shred -uvz {} +"
     }
+
+    # TODO Files have been shredded, now remove (nested) folders
 }
 
 # The script entrypoint
@@ -96,8 +102,7 @@ function Main() {
     }
 
     # Shredding files
-    ConvertTo-Linux-Paths $absPaths
-    #Close-And-Shred-Items (ConvertTo-Linux-Paths $absPaths)
+    Remove-And-Shred-Files (ConvertTo-Linux-Paths $absPaths)
 }
 
 # Running entrypoint
