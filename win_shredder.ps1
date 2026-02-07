@@ -55,7 +55,7 @@ function ConvertTo-Linux-Paths([string[]] $Paths) {
 
 # Securely removes files and folders
 function Remove-And-Shred-Files([string[]] $LinuxPaths) {
-    $options = 'uz'
+    $options = 'uzf'
 
     if ($VerbosePreference -ne 'SilentlyContinue') {
         $options += 'v'
