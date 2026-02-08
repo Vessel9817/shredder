@@ -7,7 +7,8 @@ of file shredding.
 
 ## Usage
 
-- **Explorer**: Run `installer.ps1`. **This is what most users will want.**
+- **Explorer**: Run `installer.ps1`, then restart your device.
+  **This is what most users will want.**
   By selecting a file(s) and/or folder(s), right-click and hover over
   the "Send to" option. If it's not available, click "Show more options."
   From there, you can click the Shredder option to securely erase the files.
