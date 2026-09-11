@@ -1,6 +1,6 @@
 # Shredder
 
-[![MIT license][license-badge]](LICENSE)
+[![MIT license][license-badge]](LICENSE.md)
 
 A secure file removal tool, built for Windows on top of the Linux
 [`shred`][shred] command. Skimming its manpage is highly recommended,
